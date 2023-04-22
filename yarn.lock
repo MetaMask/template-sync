@@ -966,6 +966,7 @@ __metadata:
     "@metamask/eslint-config-typescript": ^11.0.0
     "@types/inquirer": ^9.0.3
     "@types/jest": ^28.1.6
+    "@types/js-yaml": ^4.0.5
     "@types/node": ^18.15.13
     "@typescript-eslint/eslint-plugin": ^5.43.0
     "@typescript-eslint/parser": ^5.43.0
@@ -982,6 +983,7 @@ __metadata:
     inquirer: ^8.2.3
     jest: ^28.1.3
     jest-it-up: ^2.0.2
+    js-yaml: ^4.1.0
     ora: ^5.4.1
     prettier: ^2.7.1
     prettier-plugin-packagejson: ^2.3.0
@@ -1237,6 +1239,13 @@ __metadata:
     expect: ^28.0.0
     pretty-format: ^28.0.0
   checksum: d4cd36158a3ae1d4b42cc48a77c95de74bc56b84cf81e09af3ee0399c34f4a7da8ab9e787570f10004bd642f9e781b0033c37327fbbf4a8e4b6e37e8ee3693a7
+  languageName: node
+  linkType: hard
+
+"@types/js-yaml@npm:^4.0.5":
+  version: 4.0.5
+  resolution: "@types/js-yaml@npm:4.0.5"
+  checksum: 7dcac8c50fec31643cc9d6444b5503239a861414cdfaa7ae9a38bc22597c4d850c4b8cec3d82d73b3fbca408348ce223b0408d598b32e094470dfffc6d486b4d
   languageName: node
   linkType: hard
 

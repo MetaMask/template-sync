@@ -7,6 +7,7 @@ import {
   processPackageJson,
   checkLocalFiles,
 } from './processing';
+import { updateYarnRc } from './processing/yarnrc';
 import { getFiles, pathExists } from './utils';
 
 const MODULE_TEMPLATE_URL =
@@ -39,6 +40,12 @@ export async function main() {
 
         // Otherwise, clone the repository.
         await execa('git', ['clone', MODULE_TEMPLATE_URL, TEMPORARY_PATH]);
+      },
+    },
+    {
+      title: 'Updating Yarn.',
+      task: async () => {
+        await updateYarnRc(spinner);
       },
     },
     {
