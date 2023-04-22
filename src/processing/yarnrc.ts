@@ -1,6 +1,6 @@
 import { assert, isPlainObject } from '@metamask/utils';
 import execa from 'execa';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, rm, writeFile } from 'fs/promises';
 import { dump, load } from 'js-yaml';
 import { Ora } from 'ora';
 import { resolve } from 'path';
@@ -27,7 +27,8 @@ const TEMPLATE_YARN_PATH = resolve(TEMPORARY_PATH, '.yarnrc.yml');
  */
 export async function updateYarnRc(spinner: Ora) {
   if (await pathExists(LEGACY_YARN_PATH)) {
-    await execa('yarn', ['set', 'version', 'stable']);
+    warn(spinner, 'Deleting legacy .yarnrc file.');
+    await rm(LEGACY_YARN_PATH);
   }
 
   const { stdout: currentYarnVersion } = await execa('yarn', ['--version'], {
