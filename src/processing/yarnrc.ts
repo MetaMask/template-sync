@@ -30,24 +30,13 @@ export async function updateYarnRc(spinner: Ora) {
     cwd: TEMPORARY_PATH,
   });
 
-  const { stdout: rawCurrentYarnVersion } = await execa('yarn', ['--version'], {
+  const { stdout: currentYarnVersion } = await execa('yarn', ['--version'], {
     cwd: process.cwd(),
   });
-
-  let currentYarnVersion = rawCurrentYarnVersion;
 
   if (await pathExists(LEGACY_YARN_PATH)) {
     warn(spinner, 'Deleting legacy .yarnrc file.');
     await rm(LEGACY_YARN_PATH);
-
-    // If Yarn 3 is not installed, install it.
-    await execa('yarn', ['set', 'version', templateYarnVersion], {
-      cwd: process.cwd(),
-    });
-
-    // To avoid setting an old version of Yarn, we set it to the template
-    // version.
-    currentYarnVersion = templateYarnVersion;
   }
 
   if (semver.gt(currentYarnVersion, templateYarnVersion)) {
@@ -57,6 +46,11 @@ export async function updateYarnRc(spinner: Ora) {
     );
   }
 
+  const templateYarnExecutable = resolve(
+    TEMPORARY_PATH,
+    `.yarn/releases/yarn-${templateYarnVersion}.cjs`,
+  );
+
   const templateYarnRc = await readFile(TEMPLATE_YARN_PATH, 'utf8');
   const parsedTemplateYarnRc = load(templateYarnRc);
 
@@ -65,31 +59,22 @@ export async function updateYarnRc(spinner: Ora) {
   const { plugins } = parsedTemplateYarnRc;
   assert(Array.isArray(plugins));
 
-  // For compatibility with the local repository, we need to use the same Yarn
-  // version as the one currently installed. The plugins may not be available
-  // either, so we need to remove them, and install them later.
-  parsedTemplateYarnRc.yarnPath = `.yarn/releases/yarn-${currentYarnVersion}.cjs`;
-  parsedTemplateYarnRc.plugins = [];
+  // To avoid errors with the Yarn path not existing, we need to temporarily
+  // delete it from the configuration. The plugins may not be available
+  // either, so we need to delete them as well, and install them later.
+  delete parsedTemplateYarnRc.yarnPath;
+  delete parsedTemplateYarnRc.plugins;
 
   await writeFile(CURRENT_YARN_PATH, dump(parsedTemplateYarnRc));
-
-  // If the current Yarn version is older than the template version, update the
-  // Yarn version.
-  if (semver.lt(currentYarnVersion, templateYarnVersion)) {
-    await execa('yarn', ['set', 'version', templateYarnVersion], {
-      cwd: process.cwd(),
-    });
-
-    // The global Yarn CLI seems to have some kind of caching mechanism, so we
-    // need to run the local CLI directly.
-    await execa('node', [`.yarn/releases/yarn-${templateYarnVersion}.cjs`], {
-      cwd: process.cwd(),
-    });
-  }
 
   const newVersion = semver.lt(currentYarnVersion, templateYarnVersion)
     ? templateYarnVersion
     : currentYarnVersion;
+
+  // Install the new Yarn version.
+  await execa('node', [templateYarnExecutable, 'set', 'version', newVersion], {
+    cwd: process.cwd(),
+  });
 
   // (Re)install the plugins.
   for (const plugin of plugins) {
