@@ -26,18 +26,29 @@ const TEMPLATE_YARN_PATH = resolve(TEMPORARY_PATH, '.yarnrc.yml');
  * @param spinner - The spinner to use for logging.
  */
 export async function updateYarnRc(spinner: Ora) {
-  if (await pathExists(LEGACY_YARN_PATH)) {
-    warn(spinner, 'Deleting legacy .yarnrc file.');
-    await rm(LEGACY_YARN_PATH);
-  }
-
-  const { stdout: currentYarnVersion } = await execa('yarn', ['--version'], {
-    cwd: process.cwd(),
-  });
-
   const { stdout: templateYarnVersion } = await execa('yarn', ['--version'], {
     cwd: TEMPORARY_PATH,
   });
+
+  const { stdout: rawCurrentYarnVersion } = await execa('yarn', ['--version'], {
+    cwd: process.cwd(),
+  });
+
+  let currentYarnVersion = rawCurrentYarnVersion;
+
+  if (await pathExists(LEGACY_YARN_PATH)) {
+    warn(spinner, 'Deleting legacy .yarnrc file.');
+    await rm(LEGACY_YARN_PATH);
+
+    // If Yarn 3 is not installed, install it.
+    await execa('yarn', ['set', 'version', templateYarnVersion], {
+      cwd: process.cwd(),
+    });
+
+    // To avoid setting an old version of Yarn, we set it to the template
+    // version.
+    currentYarnVersion = templateYarnVersion;
+  }
 
   if (semver.gt(currentYarnVersion, templateYarnVersion)) {
     warn(
