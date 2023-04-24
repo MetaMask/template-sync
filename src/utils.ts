@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import execa from 'execa';
 import { constants } from 'fs';
 import { readFile, readdir, access } from 'fs/promises';
@@ -29,6 +30,16 @@ export function log(spinner: Ora, message: string) {
   spinner.clear();
   spinner.frame();
   console.log(message);
+}
+
+/**
+ * Log a warning to the console.
+ *
+ * @param spinner - The spinner to use for logging.
+ * @param message - The message to log.
+ */
+export function warn(spinner: Ora, message: string) {
+  log(spinner, `${chalk.yellow('⚠')} ${message}`);
 }
 
 /**

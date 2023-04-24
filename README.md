@@ -15,9 +15,6 @@ npx @metamask/template-sync
 
 ## Caveats
 
-- The `.yarnrc.yml` file is not copied, as it can potentially cause issues
-  with the local repository. Yarn 3 must be installed manually, and the file
-  must be copied manually.
 - Existing files cannot be merged, and will be either skipped or overwritten.
   - This does not apply to the `package.json` file, which will be merged with
     the latest dependencies and scripts.
