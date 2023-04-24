@@ -21,7 +21,8 @@ const TEMPLATE_YARN_PATH = resolve(TEMPORARY_PATH, '.yarnrc.yml');
  * - If the Yarn 3 version is older than the template version, it will be
  * updated to match.
  * - If the Yarn 3 version is newer than the template version, a warning will be
- * displayed. The `.yarnrc.yml` is updated to use the current version.
+ * displayed. The `.yarnrc.yml` is updated to match the template version, but
+ * the newer version is not downgraded.
  *
  * @param spinner - The spinner to use for logging.
  */
