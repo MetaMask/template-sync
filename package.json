@@ -2,7 +2,10 @@
   "name": "@metamask/template-sync",
   "version": "0.0.0",
   "description": "Synchronise a Git repository with the MetaMask module template repository.",
-  "repository": "https://github.com/MetaMask/template-sync.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaMask/template-sync.git"
+  },
   "license": "MIT",
   "author": "Maarten Zuidhoorn <maarten@zuidhoorn.com>",
   "main": "dist/index.js",
