@@ -7,15 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.0.0]
-### Uncategorized
-- Fix repository configuration in package.json ([#7](https://github.com/MetaMask/template-sync/pull/7))
-- Revert "1.0.0 (#5)" ([#5](https://github.com/MetaMask/template-sync/pull/5))
-- 1.0.0 ([#5](https://github.com/MetaMask/template-sync/pull/5))
-- Add functionality for updating `.yarnrc.yml` file ([#2](https://github.com/MetaMask/template-sync/pull/2))
-- Run `git add .` after processing ([#4](https://github.com/MetaMask/template-sync/pull/4))
-- Update configs and add CHANGELOG.md for CI to pass ([#3](https://github.com/MetaMask/template-sync/pull/3))
-- Add `publishConfig` and `lavamoat` fields to `package.json` ([#1](https://github.com/MetaMask/template-sync/pull/1))
-- Initial commit
+### Added
+- Initial release of this package.
 
 [Unreleased]: https://github.com/MetaMask/template-sync/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/MetaMask/template-sync/releases/tag/v1.0.0
