@@ -78,6 +78,14 @@ export async function main() {
         await checkLocalFiles(spinner);
       },
     },
+    {
+      title: 'Adding files to Git.',
+      task: async () => {
+        await execa('git', ['add', '.'], {
+          cwd: process.cwd(),
+        });
+      },
+    },
   ];
 
   for (const { title, task } of tasks) {
