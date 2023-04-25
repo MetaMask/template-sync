@@ -67,16 +67,17 @@ export async function processPackageJson({ spinner, check }: TaskOptions) {
             spinner,
             `Local "${name}" dependency is out of date. It should be "${version}".`,
           );
-        } else {
-          log(
-            spinner,
-            chalk.dim(
-              `Updating dependency "${chalk.bold(name)}" to "${chalk.bold(
-                version,
-              )}"`,
-            ),
-          );
+          continue;
         }
+
+        log(
+          spinner,
+          chalk.dim(
+            `Updating dependency "${chalk.bold(name)}" to "${chalk.bold(
+              version,
+            )}"`,
+          ),
+        );
 
         currentDependencies[name] = version;
       }
@@ -95,10 +96,10 @@ export async function processPackageJson({ spinner, check }: TaskOptions) {
             spinner,
             `Local "${name}" script is missing. It should be "${script}".`,
           );
-        } else {
-          log(spinner, chalk.dim(`Adding script "${chalk.reset(name)}".`));
+          continue;
         }
 
+        log(spinner, chalk.dim(`Adding script "${chalk.reset(name)}".`));
         currentPackageJson.scripts[name] = script;
       }
 
@@ -108,29 +109,30 @@ export async function processPackageJson({ spinner, check }: TaskOptions) {
             spinner,
             `Local "${name}" script does not match the template. It should be "${script}".`,
           );
-        } else {
-          spinner.stop();
-          const { choice } = await inquirer.prompt<{ choice: ScriptChoice }>([
-            {
-              type: 'list',
-              name: 'choice',
-              message: `Local "${name}" script does not match the template. What do you want to do?`,
-              choices: Object.values(ScriptChoice),
-            },
-          ]);
-          spinner.start();
+          continue;
+        }
 
-          if (choice === ScriptChoice.Skip) {
-            log(
-              spinner,
-              `${chalk.yellow('⚠')} Not overwriting "${script}" script.`,
-            );
-            continue;
-          }
+        spinner.stop();
+        const { choice } = await inquirer.prompt<{ choice: ScriptChoice }>([
+          {
+            type: 'list',
+            name: 'choice',
+            message: `Local "${name}" script does not match the template. What do you want to do?`,
+            choices: Object.values(ScriptChoice),
+          },
+        ]);
+        spinner.start();
 
-          if (choice === ScriptChoice.Overwrite) {
-            currentPackageJson.scripts[name] = script;
-          }
+        if (choice === ScriptChoice.Skip) {
+          log(
+            spinner,
+            `${chalk.yellow('⚠')} Not overwriting "${script}" script.`,
+          );
+          continue;
+        }
+
+        if (choice === ScriptChoice.Overwrite) {
+          currentPackageJson.scripts[name] = script;
         }
       }
     }
