@@ -33,6 +33,7 @@ async function checkLegacyYarnRc({ spinner, check }: TaskOptions) {
       spinner,
       'Legacy .yarnrc file exists. It will not be deleted because the --check flag is enabled.',
     );
+    return;
   }
 
   warn(spinner, 'Deleting legacy .yarnrc file.');
