@@ -84,23 +84,35 @@ export async function main() {
         await processPackageJson(options);
       },
     },
-    // {
-    //   title: 'Installing dependencies (`yarn`).',
-    //   task: async () => {
-    //     await execa('yarn', {
-    //       cwd: process.cwd(),
-    //     });
-    //   },
-    // },
-    // {
-    //   title: 'Formatting files (`yarn lint:fix`).',
-    //   task: async () => {
-    //     await execa('yarn', ['lint:fix'], {
-    //       cwd: process.cwd(),
-    //       reject: false,
-    //     });
-    //   },
-    // },
+    {
+      title: 'Installing dependencies (`yarn`).',
+      task: async (options) => {
+        // This task does not do anything if the --check flag is enabled, so
+        // there is no need to log a message.
+        if (options.check) {
+          return;
+        }
+
+        await execa('yarn', {
+          cwd: process.cwd(),
+        });
+      },
+    },
+    {
+      title: 'Formatting files (`yarn lint:fix`).',
+      task: async (options) => {
+        // This task does not do anything if the --check flag is enabled, so
+        // there is no need to log a message.
+        if (options.check) {
+          return;
+        }
+
+        await execa('yarn', ['lint:fix'], {
+          cwd: process.cwd(),
+          reject: false,
+        });
+      },
+    },
     // {
     //   title: 'Checking for extra files.',
     //   task: async () => {
