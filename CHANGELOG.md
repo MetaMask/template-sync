@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.1.0]
-### Uncategorized
+### Added
 - Add `--check` flag for checking if the local repository matches ([#9](https://github.com/MetaMask/template-sync/pull/9))
-- Add files array to package.json and update lint:dependencies script ([#10](https://github.com/MetaMask/template-sync/pull/10))
+  - When this is enabled, no files will be modified.
 
 ## [1.0.0]
 ### Added
