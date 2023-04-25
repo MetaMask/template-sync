@@ -1,6 +1,9 @@
 import execa from 'execa';
-import ora, { Ora } from 'ora';
+import ora from 'ora';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
+import { TaskOptions } from './options';
 import {
   processFile,
   TEMPORARY_PATH,
@@ -15,15 +18,25 @@ const MODULE_TEMPLATE_URL =
 
 type Task = {
   title: string;
-  task: (options: { spinner: Ora }) => Promise<void>;
+  task: (options: TaskOptions) => Promise<void>;
 };
 
 /**
  * Run the CLI.
  */
 export async function main() {
-  const spinner = ora('Fetching module template.').start();
+  const { check } = await yargs(hideBin(process.argv))
+    .command('$0', 'Synchronise the module template with the current project.')
+    .option('check', {
+      alias: 'c',
+      type: 'boolean',
+      default: false,
+      description:
+        'Whether to only check for changes compared to the template. When this is enabled, no files will be modified.',
+    })
+    .parse();
 
+  const spinner = ora('Fetching module template.').start();
   const tasks: Task[] = [
     {
       title: 'Fetching module template.',
@@ -44,8 +57,8 @@ export async function main() {
     },
     {
       title: 'Updating Yarn.',
-      task: async () => {
-        await updateYarnRc(spinner);
+      task: async (options) => {
+        await updateYarnRc(options);
       },
     },
     {
@@ -97,7 +110,7 @@ export async function main() {
 
   for (const { title, task } of tasks) {
     spinner.text = title;
-    await task({ spinner });
+    await task({ spinner, check });
   }
 
   spinner.succeed('Done!');
