@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { writeFile } from 'fs/promises';
 import inquirer from 'inquirer';
-import { Ora } from 'ora';
 import { resolve } from 'path';
 import semver from 'semver';
 

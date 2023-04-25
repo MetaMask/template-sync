@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import execa from 'execa';
 import { copyFile, mkdir, rm } from 'fs/promises';
 import inquirer from 'inquirer';
-import { Ora } from 'ora';
 import os from 'os';
 import { dirname, resolve } from 'path';
 

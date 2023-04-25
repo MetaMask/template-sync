@@ -11,7 +11,7 @@ import {
   checkLocalFiles,
 } from './processing';
 import { updateYarnRc } from './processing/yarnrc';
-import { getFiles, info, pathExists, warn } from './utils';
+import { getFiles, pathExists } from './utils';
 
 const MODULE_TEMPLATE_URL =
   'https://github.com/MetaMask/metamask-module-template.git';
