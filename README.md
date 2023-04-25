@@ -13,6 +13,15 @@ easy-to-use CLI tool.
 npx @metamask/template-sync
 ```
 
+```
+Options:
+      --help     Show help                                             [boolean]
+      --version  Show version number                                   [boolean]
+  -c, --check    Whether to only check for changes compared to the template.
+                 When this is enabled, no files will be modified.
+                                                      [boolean] [default: false]
+```
+
 ## Caveats
 
 - Existing files cannot be merged, and will be either skipped or overwritten.

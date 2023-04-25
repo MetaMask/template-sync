@@ -110,14 +110,20 @@ export async function main() {
         await checkLocalFiles(options);
       },
     },
-    // {
-    //   title: 'Adding files to Git.',
-    //   task: async () => {
-    //     await execa('git', ['add', '.'], {
-    //       cwd: process.cwd(),
-    //     });
-    //   },
-    // },
+    {
+      title: 'Adding files to Git.',
+      task: async (options) => {
+        // This task does not do anything if the --check flag is enabled, so
+        // there is no need to log a message.
+        if (options.check) {
+          return;
+        }
+
+        await execa('git', ['add', '.'], {
+          cwd: process.cwd(),
+        });
+      },
+    },
   ];
 
   for (const { title, task } of tasks) {
