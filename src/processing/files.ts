@@ -6,12 +6,14 @@ import { Ora } from 'ora';
 import os from 'os';
 import { dirname, resolve } from 'path';
 
+import { TaskOptions } from '../options';
 import {
   getFiles,
   getRelativePath,
   isFileEqual,
   log,
   pathExists,
+  warn,
 } from '../utils';
 
 export const TEMPORARY_PATH = resolve(os.tmpdir(), 'metamask-module-template');
@@ -65,11 +67,15 @@ async function handleDuplicate(
 /**
  * Process a file.
  *
- * @param spinner - The spinner to use for logging.
+ * @param options - The options for the task.
+ * @param options.spinner - The spinner to use for logging.
  * @param file - The path to the file.
  * @returns A promise that resolves when the file has been processed.
  */
-export async function processFile(spinner: Ora, file: string): Promise<void> {
+export async function processFile(
+  { spinner }: TaskOptions,
+  file: string,
+): Promise<void> {
   const relativePath = getRelativePath(file, TEMPORARY_PATH);
   const destination = resolve(process.cwd(), relativePath);
 
@@ -140,4 +146,39 @@ export async function checkLocalFiles(spinner: Ora): Promise<void> {
       }
     }
   }
+}
+
+/**
+ * Show a diff between the local file and the template file, if the file is
+ * different.
+ *
+ * @param options - The task options.
+ * @param options.spinner - The spinner to use for logging.
+ * @param relativePath - The relative path to the file.
+ * @returns A promise that resolves when the diff has been shown.
+ */
+export async function handleFileDifference(
+  { spinner }: TaskOptions,
+  relativePath: string,
+) {
+  const localPath = resolve(process.cwd(), relativePath);
+  const templatePath = resolve(TEMPORARY_PATH, relativePath);
+
+  const { choice } = await inquirer.prompt<{ choice: boolean }>([
+    {
+      type: 'confirm',
+      name: 'choice',
+      message: `File "${relativePath}" is different from the template. Do you want to see the diff?`,
+      default: true,
+    },
+  ]);
+
+  if (choice) {
+    return await execa('git', ['diff', '--no-index', localPath, templatePath], {
+      stdio: 'inherit',
+      reject: false,
+    });
+  }
+
+  warn(spinner, `File "${relativePath}" is different from the template.`);
 }

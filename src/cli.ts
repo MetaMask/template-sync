@@ -11,7 +11,7 @@ import {
   checkLocalFiles,
 } from './processing';
 import { updateYarnRc } from './processing/yarnrc';
-import { getFiles, pathExists } from './utils';
+import { getFiles, info, pathExists, warn } from './utils';
 
 const MODULE_TEMPLATE_URL =
   'https://github.com/MetaMask/metamask-module-template.git';
@@ -63,49 +63,58 @@ export async function main() {
     },
     {
       title: 'Processing files.',
-      task: async () => {
+      task: async (options) => {
+        if (options.check) {
+          info(
+            spinner,
+            'Files will not be processed because the --check flag is enabled.',
+          );
+
+          return;
+        }
+
         for await (const file of getFiles(TEMPORARY_PATH)) {
-          await processFile(spinner, file);
+          await processFile(options, file);
         }
       },
     },
-    {
-      title: 'Processing "package.json".',
-      task: async () => {
-        await processPackageJson(spinner);
-      },
-    },
-    {
-      title: 'Installing dependencies (`yarn`).',
-      task: async () => {
-        await execa('yarn', {
-          cwd: process.cwd(),
-        });
-      },
-    },
-    {
-      title: 'Formatting files (`yarn lint:fix`).',
-      task: async () => {
-        await execa('yarn', ['lint:fix'], {
-          cwd: process.cwd(),
-          reject: false,
-        });
-      },
-    },
-    {
-      title: 'Checking for extra files.',
-      task: async () => {
-        await checkLocalFiles(spinner);
-      },
-    },
-    {
-      title: 'Adding files to Git.',
-      task: async () => {
-        await execa('git', ['add', '.'], {
-          cwd: process.cwd(),
-        });
-      },
-    },
+    //   title: 'Processing "package.json".',
+    //   task: async () => {
+    //     await processPackageJson(spinner);
+    //   },
+    // },
+    // {
+    // {
+    //   title: 'Installing dependencies (`yarn`).',
+    //   task: async () => {
+    //     await execa('yarn', {
+    //       cwd: process.cwd(),
+    //     });
+    //   },
+    // },
+    // {
+    //   title: 'Formatting files (`yarn lint:fix`).',
+    //   task: async () => {
+    //     await execa('yarn', ['lint:fix'], {
+    //       cwd: process.cwd(),
+    //       reject: false,
+    //     });
+    //   },
+    // },
+    // {
+    //   title: 'Checking for extra files.',
+    //   task: async () => {
+    //     await checkLocalFiles(spinner);
+    //   },
+    // },
+    // {
+    //   title: 'Adding files to Git.',
+    //   task: async () => {
+    //     await execa('git', ['add', '.'], {
+    //       cwd: process.cwd(),
+    //     });
+    //   },
+    // },
   ];
 
   for (const { title, task } of tasks) {
