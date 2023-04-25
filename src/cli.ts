@@ -78,12 +78,12 @@ export async function main() {
         }
       },
     },
-    //   title: 'Processing "package.json".',
-    //   task: async () => {
-    //     await processPackageJson(spinner);
-    //   },
-    // },
-    // {
+    {
+      title: 'Processing "package.json".',
+      task: async (options) => {
+        await processPackageJson(options);
+      },
+    },
     // {
     //   title: 'Installing dependencies (`yarn`).',
     //   task: async () => {
