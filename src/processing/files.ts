@@ -69,19 +69,28 @@ async function handleDuplicate(
  *
  * @param options - The options for the task.
  * @param options.spinner - The spinner to use for logging.
+ * @param options.check - Whether to only check for changes compared to the
+ * template. When this is enabled, no files will be modified.
  * @param file - The path to the file.
  * @returns A promise that resolves when the file has been processed.
  */
 export async function processFile(
-  { spinner }: TaskOptions,
+  options: TaskOptions,
   file: string,
 ): Promise<void> {
+  const { spinner, check } = options;
+
   const relativePath = getRelativePath(file, TEMPORARY_PATH);
   const destination = resolve(process.cwd(), relativePath);
 
   if (await pathExists(destination)) {
     // Files that are equal to the destination do not need to be processed.
     if (await isFileEqual(file, destination)) {
+      return;
+    }
+
+    if (check) {
+      await handleFileDifference(options, relativePath);
       return;
     }
 
@@ -116,15 +125,30 @@ export async function processFile(
 /**
  * Check for files that exist locally, but not in the template.
  *
- * @param spinner - The spinner to use for logging.
+ * @param options - The options for the task.
+ * @param options.spinner - The spinner to use for logging.
+ * @param options.check - Whether to only check for changes compared to the
+ * template. When this is enabled, no files will be modified.
  * @returns A promise that resolves when the files have been checked.
  */
-export async function checkLocalFiles(spinner: Ora): Promise<void> {
+export async function checkLocalFiles({
+  spinner,
+  check,
+}: TaskOptions): Promise<void> {
   for await (const file of getFiles(process.cwd())) {
     const relativePath = getRelativePath(file, process.cwd());
     const destination = resolve(TEMPORARY_PATH, relativePath);
 
     if (!(await pathExists(destination))) {
+      if (check) {
+        warn(
+          spinner,
+          ` File "${relativePath}" exists locally, but not in the template.`,
+        );
+
+        continue;
+      }
+
       spinner.stop();
       const { choice } = await inquirer.prompt<{ choice: UnknownChoice }>([
         {
@@ -164,6 +188,8 @@ export async function handleFileDifference(
   const localPath = resolve(process.cwd(), relativePath);
   const templatePath = resolve(TEMPORARY_PATH, relativePath);
 
+  spinner.stop();
+
   const { choice } = await inquirer.prompt<{ choice: boolean }>([
     {
       type: 'confirm',
@@ -174,11 +200,13 @@ export async function handleFileDifference(
   ]);
 
   if (choice) {
-    return await execa('git', ['diff', '--no-index', localPath, templatePath], {
+    await execa('git', ['diff', '--no-index', localPath, templatePath], {
       stdio: 'inherit',
       reject: false,
     });
   }
 
   warn(spinner, `File "${relativePath}" is different from the template.`);
+
+  spinner.start();
 }

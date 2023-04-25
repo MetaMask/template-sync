@@ -64,15 +64,6 @@ export async function main() {
     {
       title: 'Processing files.',
       task: async (options) => {
-        if (options.check) {
-          info(
-            spinner,
-            'Files will not be processed because the --check flag is enabled.',
-          );
-
-          return;
-        }
-
         for await (const file of getFiles(TEMPORARY_PATH)) {
           await processFile(options, file);
         }
@@ -113,12 +104,12 @@ export async function main() {
         });
       },
     },
-    // {
-    //   title: 'Checking for extra files.',
-    //   task: async () => {
-    //     await checkLocalFiles(spinner);
-    //   },
-    // },
+    {
+      title: 'Checking for extra files.',
+      task: async (options) => {
+        await checkLocalFiles(options);
+      },
+    },
     // {
     //   title: 'Adding files to Git.',
     //   task: async () => {
