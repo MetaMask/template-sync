@@ -2,16 +2,17 @@ import chalk from 'chalk';
 import execa from 'execa';
 import { copyFile, mkdir, rm } from 'fs/promises';
 import inquirer from 'inquirer';
-import { Ora } from 'ora';
 import os from 'os';
 import { dirname, resolve } from 'path';
 
+import { TaskOptions } from '../options';
 import {
   getFiles,
   getRelativePath,
   isFileEqual,
   log,
   pathExists,
+  warn,
 } from '../utils';
 
 export const TEMPORARY_PATH = resolve(os.tmpdir(), 'metamask-module-template');
@@ -65,17 +66,30 @@ async function handleDuplicate(
 /**
  * Process a file.
  *
- * @param spinner - The spinner to use for logging.
+ * @param options - The options for the task.
+ * @param options.spinner - The spinner to use for logging.
+ * @param options.check - Whether to only check for changes compared to the
+ * template. When this is enabled, no files will be modified.
  * @param file - The path to the file.
  * @returns A promise that resolves when the file has been processed.
  */
-export async function processFile(spinner: Ora, file: string): Promise<void> {
+export async function processFile(
+  options: TaskOptions,
+  file: string,
+): Promise<void> {
+  const { spinner, check } = options;
+
   const relativePath = getRelativePath(file, TEMPORARY_PATH);
   const destination = resolve(process.cwd(), relativePath);
 
   if (await pathExists(destination)) {
     // Files that are equal to the destination do not need to be processed.
     if (await isFileEqual(file, destination)) {
+      return;
+    }
+
+    if (check) {
+      await handleFileDifference(options, relativePath);
       return;
     }
 
@@ -110,15 +124,30 @@ export async function processFile(spinner: Ora, file: string): Promise<void> {
 /**
  * Check for files that exist locally, but not in the template.
  *
- * @param spinner - The spinner to use for logging.
+ * @param options - The options for the task.
+ * @param options.spinner - The spinner to use for logging.
+ * @param options.check - Whether to only check for changes compared to the
+ * template. When this is enabled, no files will be modified.
  * @returns A promise that resolves when the files have been checked.
  */
-export async function checkLocalFiles(spinner: Ora): Promise<void> {
+export async function checkLocalFiles({
+  spinner,
+  check,
+}: TaskOptions): Promise<void> {
   for await (const file of getFiles(process.cwd())) {
     const relativePath = getRelativePath(file, process.cwd());
     const destination = resolve(TEMPORARY_PATH, relativePath);
 
     if (!(await pathExists(destination))) {
+      if (check) {
+        warn(
+          spinner,
+          ` File "${relativePath}" exists locally, but not in the template.`,
+        );
+
+        continue;
+      }
+
       spinner.stop();
       const { choice } = await inquirer.prompt<{ choice: UnknownChoice }>([
         {
@@ -140,4 +169,43 @@ export async function checkLocalFiles(spinner: Ora): Promise<void> {
       }
     }
   }
+}
+
+/**
+ * Show a diff between the local file and the template file, if the file is
+ * different.
+ *
+ * @param options - The task options.
+ * @param options.spinner - The spinner to use for logging.
+ * @param relativePath - The relative path to the file.
+ * @returns A promise that resolves when the diff has been shown.
+ */
+export async function handleFileDifference(
+  { spinner }: TaskOptions,
+  relativePath: string,
+) {
+  const localPath = resolve(process.cwd(), relativePath);
+  const templatePath = resolve(TEMPORARY_PATH, relativePath);
+
+  spinner.stop();
+
+  const { choice } = await inquirer.prompt<{ choice: boolean }>([
+    {
+      type: 'confirm',
+      name: 'choice',
+      message: `File "${relativePath}" is different from the template. Do you want to see the diff?`,
+      default: true,
+    },
+  ]);
+
+  if (choice) {
+    await execa('git', ['diff', '--no-index', localPath, templatePath], {
+      stdio: 'inherit',
+      reject: false,
+    });
+  }
+
+  warn(spinner, `File "${relativePath}" is different from the template.`);
+
+  spinner.start();
 }

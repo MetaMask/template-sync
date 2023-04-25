@@ -43,6 +43,16 @@ export function warn(spinner: Ora, message: string) {
 }
 
 /**
+ * Log an info message to the console.
+ *
+ * @param spinner - The spinner to use for logging.
+ * @param message - The message to log.
+ */
+export function info(spinner: Ora, message: string) {
+  log(spinner, `${chalk.blue('ℹ')} ${chalk.dim(message)}`);
+}
+
+/**
  * Asynchronously check if a file or folder exists.
  *
  * @param path - The path to check.

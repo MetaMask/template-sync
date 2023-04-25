@@ -1,12 +1,12 @@
 import chalk from 'chalk';
 import { writeFile } from 'fs/promises';
 import inquirer from 'inquirer';
-import { Ora } from 'ora';
 import { resolve } from 'path';
 import semver from 'semver';
 
 import { TEMPORARY_PATH } from './files';
-import { getJsonFile, log } from '../utils';
+import { TaskOptions } from '../options';
+import { getJsonFile, log, warn } from '../utils';
 
 type PackageJson = {
   scripts?: Record<string, string>;
@@ -38,10 +38,12 @@ enum ScriptChoice {
  * - Updates any dependencies that are out of date.
  * - Adds any missing scripts.
  *
- * @param spinner - The spinner to use for logging.
- * @returns A promise that resolves when the file has been processed.
+ * @param options - The options for the task.
+ * @param options.spinner - The spinner to use for logging.
+ * @param options.check - Whether to only check for changes compared to the
+ * template. When this is enabled, no files will be modified. * @returns A promise that resolves when the file has been processed.
  */
-export async function processPackageJson(spinner: Ora) {
+export async function processPackageJson({ spinner, check }: TaskOptions) {
   const currentPackageJson = await getJsonFile<PackageJson>(
     resolve(process.cwd(), 'package.json'),
   );
@@ -60,6 +62,14 @@ export async function processPackageJson(spinner: Ora) {
     for (const [name, version] of Object.entries(templateDependencies)) {
       const currentVersion = currentDependencies[name];
       if (!currentVersion || semver.ltr(currentVersion.slice(1), version)) {
+        if (check) {
+          warn(
+            spinner,
+            `Local "${name}" dependency is out of date. It should be "${version}".`,
+          );
+          continue;
+        }
+
         log(
           spinner,
           chalk.dim(
@@ -68,6 +78,7 @@ export async function processPackageJson(spinner: Ora) {
             )}"`,
           ),
         );
+
         currentDependencies[name] = version;
       }
     }
@@ -80,11 +91,27 @@ export async function processPackageJson(spinner: Ora) {
       }
 
       if (!currentPackageJson.scripts[name]) {
+        if (check) {
+          warn(
+            spinner,
+            `Local "${name}" script is missing. It should be "${script}".`,
+          );
+          continue;
+        }
+
         log(spinner, chalk.dim(`Adding script "${chalk.reset(name)}".`));
         currentPackageJson.scripts[name] = script;
       }
 
       if (currentPackageJson.scripts[name] !== script) {
+        if (check) {
+          warn(
+            spinner,
+            `Local "${name}" script does not match the template. It should be "${script}".`,
+          );
+          continue;
+        }
+
         spinner.stop();
         const { choice } = await inquirer.prompt<{ choice: ScriptChoice }>([
           {
@@ -111,8 +138,10 @@ export async function processPackageJson(spinner: Ora) {
     }
   }
 
-  await writeFile(
-    resolve(process.cwd(), 'package.json'),
-    JSON.stringify(currentPackageJson, null, 2),
-  );
+  if (!check) {
+    await writeFile(
+      resolve(process.cwd(), 'package.json'),
+      JSON.stringify(currentPackageJson, null, 2),
+    );
+  }
 }
