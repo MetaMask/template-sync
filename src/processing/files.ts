@@ -86,7 +86,10 @@ export async function processFile(
     // Files that are equal to the destination do not need to be processed.
     if (await isFileEqual(file, destination)) {
       if (check) {
-        log(spinner, `${chalk.green('✓')} File "${relativePath}" matches the template.`);
+        log(
+          spinner,
+          `${chalk.green('✓')} File "${relativePath}" matches the template.`,
+        );
       }
       return;
     }
