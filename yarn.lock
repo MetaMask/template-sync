@@ -1183,6 +1183,7 @@ __metadata:
     "@types/jest": ^28.1.6
     "@types/js-yaml": ^4.0.5
     "@types/node": ^18.15.13
+    "@types/semver": ^7.7.0
     "@typescript-eslint/eslint-plugin": ^8.35.0
     "@typescript-eslint/parser": ^8.35.0
     chalk: ^4.1.2
@@ -1633,6 +1634,13 @@ __metadata:
   version: 2.7.2
   resolution: "@types/prettier@npm:2.7.2"
   checksum: b47d76a5252265f8d25dd2fe2a5a61dc43ba0e6a96ffdd00c594cb4fd74c1982c2e346497e3472805d97915407a09423804cc2110a0b8e1b22cffcab246479b7
+  languageName: node
+  linkType: hard
+
+"@types/semver@npm:^7.7.0":
+  version: 7.7.0
+  resolution: "@types/semver@npm:7.7.0"
+  checksum: d488eaeddb23879a0a8a759bed667e1a76cb0dd4d23e3255538e24c189db387357953ca9e7a3bda2bb7f95e84cac8fe0db4fbe6b3456e893043337732d1d23cc
   languageName: node
   linkType: hard
 
