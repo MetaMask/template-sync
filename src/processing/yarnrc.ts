@@ -3,10 +3,10 @@ import execa from 'execa';
 import { readFile, rm, writeFile } from 'fs/promises';
 import { dump, load } from 'js-yaml';
 import { resolve } from 'path';
-import semver from 'semver';
+import * as semver from 'semver';
 
 import { TEMPORARY_PATH } from './files';
-import { TaskOptions } from '../options';
+import type { TaskOptions } from '../options';
 import { pathExists, warn } from '../utils';
 
 const LEGACY_YARN_PATH = resolve(process.cwd(), '.yarnrc');
@@ -22,7 +22,10 @@ const TEMPLATE_YARN_PATH = resolve(TEMPORARY_PATH, '.yarnrc.yml');
  * @param options.check - Whether to only check for changes compared to the
  * template. When this is enabled, no files will be modified.
  */
-async function checkLegacyYarnRc({ spinner, check }: TaskOptions) {
+async function checkLegacyYarnRc({
+  spinner,
+  check,
+}: TaskOptions): Promise<void> {
   const legacyYarnRcExists = await pathExists(LEGACY_YARN_PATH);
   if (!legacyYarnRcExists) {
     return;
@@ -55,7 +58,7 @@ async function checkYarnVersion(
   { spinner, check }: TaskOptions,
   currentYarnVersion: string,
   templateYarnVersion: string,
-) {
+): Promise<void> {
   if (!check && semver.gt(currentYarnVersion, templateYarnVersion)) {
     warn(
       spinner,
@@ -87,7 +90,7 @@ async function checkYarnVersion(
  * @param options.check - Whether to only check for changes compared to the
  * template. When this is enabled, no files will be modified.
  */
-export async function updateYarnRc(options: TaskOptions) {
+export async function updateYarnRc(options: TaskOptions): Promise<void> {
   const { stdout: templateYarnVersion } = await execa('yarn', ['--version'], {
     cwd: TEMPORARY_PATH,
   });

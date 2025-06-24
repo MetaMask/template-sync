@@ -2,10 +2,10 @@ import chalk from 'chalk';
 import { writeFile } from 'fs/promises';
 import inquirer from 'inquirer';
 import { resolve } from 'path';
-import semver from 'semver';
+import * as semver from 'semver';
 
 import { TEMPORARY_PATH } from './files';
-import { TaskOptions } from '../options';
+import type { TaskOptions } from '../options';
 import { getJsonFile, log, warn } from '../utils';
 
 type PackageJson = {
@@ -43,7 +43,10 @@ enum ScriptChoice {
  * @param options.check - Whether to only check for changes compared to the
  * template. When this is enabled, no files will be modified. * @returns A promise that resolves when the file has been processed.
  */
-export async function processPackageJson({ spinner, check }: TaskOptions) {
+export async function processPackageJson({
+  spinner,
+  check,
+}: TaskOptions): Promise<void> {
   const currentPackageJson = await getJsonFile<PackageJson>(
     resolve(process.cwd(), 'package.json'),
   );
@@ -86,9 +89,7 @@ export async function processPackageJson({ spinner, check }: TaskOptions) {
 
   if (templatePackageJson.scripts) {
     for (const [name, script] of Object.entries(templatePackageJson.scripts)) {
-      if (!currentPackageJson.scripts) {
-        currentPackageJson.scripts = {};
-      }
+      currentPackageJson.scripts ??= {};
 
       if (!currentPackageJson.scripts[name]) {
         if (check) {

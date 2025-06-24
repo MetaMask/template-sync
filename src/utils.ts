@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import execa from 'execa';
 import { constants } from 'fs';
 import { readFile, readdir, access } from 'fs/promises';
-import { Ora } from 'ora';
+import type { Ora } from 'ora';
 import { relative, resolve } from 'path';
 
 /**
@@ -26,7 +26,7 @@ const IGNORED_FILES = [
  * @param spinner - The spinner to use for logging.
  * @param message - The message to log.
  */
-export function log(spinner: Ora, message: string) {
+export function log(spinner: Ora, message: string): void {
   spinner.clear();
   spinner.frame();
   console.log(message);
@@ -38,7 +38,7 @@ export function log(spinner: Ora, message: string) {
  * @param spinner - The spinner to use for logging.
  * @param message - The message to log.
  */
-export function warn(spinner: Ora, message: string) {
+export function warn(spinner: Ora, message: string): void {
   log(spinner, `${chalk.yellow('⚠')} ${message}`);
 }
 
@@ -48,7 +48,7 @@ export function warn(spinner: Ora, message: string) {
  * @param spinner - The spinner to use for logging.
  * @param message - The message to log.
  */
-export function info(spinner: Ora, message: string) {
+export function info(spinner: Ora, message: string): void {
   log(spinner, `${chalk.blue('ℹ')} ${chalk.dim(message)}`);
 }
 
@@ -63,7 +63,7 @@ export async function pathExists(path: string): Promise<boolean> {
   try {
     await access(path, constants.F_OK);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
