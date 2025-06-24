@@ -5,7 +5,7 @@ import inquirer from 'inquirer';
 import os from 'os';
 import { dirname, resolve } from 'path';
 
-import { TaskOptions } from '../options';
+import type { TaskOptions } from '../options';
 import {
   getFiles,
   getRelativePath,
@@ -189,7 +189,7 @@ export async function checkLocalFiles({
 export async function handleFileDifference(
   { spinner }: TaskOptions,
   relativePath: string,
-) {
+): Promise<void> {
   const localPath = resolve(process.cwd(), relativePath);
   const templatePath = resolve(TEMPORARY_PATH, relativePath);
 

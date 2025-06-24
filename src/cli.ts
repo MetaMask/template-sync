@@ -3,7 +3,7 @@ import ora from 'ora';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import { TaskOptions } from './options';
+import type { TaskOptions } from './options';
 import {
   processFile,
   TEMPORARY_PATH,
@@ -24,7 +24,7 @@ type Task = {
 /**
  * Run the CLI.
  */
-export async function main() {
+export async function main(): Promise<void> {
   const { check } = await yargs(hideBin(process.argv))
     .command('$0', 'Synchronise the module template with the current project.')
     .option('check', {
@@ -40,7 +40,7 @@ export async function main() {
   const tasks: Task[] = [
     {
       title: 'Fetching module template.',
-      task: async () => {
+      task: async (): Promise<void> => {
         // Check if the temporary path exists, and if so, pull the latest
         // changes.
         if (await pathExists(TEMPORARY_PATH)) {
@@ -57,13 +57,13 @@ export async function main() {
     },
     {
       title: 'Updating Yarn.',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         await updateYarnRc(options);
       },
     },
     {
       title: 'Processing files.',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         for await (const file of getFiles(TEMPORARY_PATH)) {
           await processFile(options, file);
         }
@@ -71,13 +71,13 @@ export async function main() {
     },
     {
       title: 'Processing "package.json".',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         await processPackageJson(options);
       },
     },
     {
       title: 'Installing dependencies (`yarn`).',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         // This task does not do anything if the --check flag is enabled, so
         // there is no need to log a message.
         if (options.check) {
@@ -91,7 +91,7 @@ export async function main() {
     },
     {
       title: 'Formatting files (`yarn lint:fix`).',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         // This task does not do anything if the --check flag is enabled, so
         // there is no need to log a message.
         if (options.check) {
@@ -106,13 +106,13 @@ export async function main() {
     },
     {
       title: 'Checking for extra files.',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         await checkLocalFiles(options);
       },
     },
     {
       title: 'Adding files to Git.',
-      task: async (options) => {
+      task: async (options): Promise<void> => {
         // This task does not do anything if the --check flag is enabled, so
         // there is no need to log a message.
         if (options.check) {
