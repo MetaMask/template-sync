@@ -3,7 +3,7 @@ import execa from 'execa';
 import { readFile, rm, writeFile } from 'fs/promises';
 import { dump, load } from 'js-yaml';
 import { resolve } from 'path';
-import semver from 'semver';
+import * as semver from 'semver';
 
 import { TEMPORARY_PATH } from './files';
 import type { TaskOptions } from '../options';

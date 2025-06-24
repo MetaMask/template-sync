@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { writeFile } from 'fs/promises';
 import inquirer from 'inquirer';
 import { resolve } from 'path';
-import semver from 'semver';
+import * as semver from 'semver';
 
 import { TEMPORARY_PATH } from './files';
 import type { TaskOptions } from '../options';
@@ -89,9 +89,7 @@ export async function processPackageJson({
 
   if (templatePackageJson.scripts) {
     for (const [name, script] of Object.entries(templatePackageJson.scripts)) {
-      if (!currentPackageJson.scripts) {
-        currentPackageJson.scripts = {};
-      }
+      currentPackageJson.scripts ??= {};
 
       if (!currentPackageJson.scripts[name]) {
         if (check) {

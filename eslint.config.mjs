@@ -20,6 +20,8 @@ const config = createConfig([
     },
     languageOptions: {
       parserOptions: {
+        // `import.meta.dirname` is supported in Node.js 20.11.0+
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         tsconfigRootDir: import.meta.dirname,
         project: ['./tsconfig.json'],
       },
